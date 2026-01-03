@@ -39,7 +39,7 @@ class EventController extends Controller
     public function show(Event $event)
     {
         // Load relationships (responses) if needed for the view
-        $event->load(['responses', 'user']);
+        $event->load(['responses.province', 'responses.district', 'responses.user', 'user']);
         
         $viewModel = new EventViewModel($event, auth()->user());
 

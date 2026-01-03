@@ -9,14 +9,28 @@
     
     times: [],
     availableTimes: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'],
+    provinces: {{ json_encode($viewModel->provinces()) }},
+    districts: {{ json_encode($viewModel->districts()) }},
+    selectedProvince: '',
+    selectedDistrict: '',
+    availableDistricts: [],
 
-    get daysDifference() {
-        const diffTime = Math.abs(this.endDate - this.startDate);
-        return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
+    updateDistricts() {
+        this.availableDistricts = this.districts[this.selectedProvince] || [];
+        this.selectedDistrict = '';
     },
 
-    formatDate(dateObj) {
-        return dateObj.getDate(); 
+    get locationValid() {
+        if(this.locationMode === 'common') {
+            return this.location === 'current' || (this.selectedProvince && this.selectedDistrict);
+        }
+        return this.location;
+    },
+
+    get daysDifference() {
+        if(!this.startDate || !this.endDate) return 0;
+        const diffTime = Math.abs(this.endDate - this.startDate);
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
     },
 
     toggleDate(dateStr) {
@@ -88,13 +102,23 @@
                     </div>
                 </div>
                 
-                <div class="relative group">
-                     <select class="input-field" x-model="location">
-                        <option value="" disabled selected>Şehir / İlçe Seçin</option>
-                        <option value="istanbul">İstanbul</option>
-                        <option value="ankara">Ankara</option>
-                        <option value="izmir">İzmir</option>
-                    </select>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="relative group">
+                         <select class="input-field" x-model="selectedProvince" @change="updateDistricts()">
+                            <option value="" disabled selected>Lütfen İl Seçiniz</option>
+                            <template x-for="province in provinces" :key="province.id">
+                                <option :value="province.id" x-text="province.name"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <div class="relative group">
+                         <select class="input-field" x-model="selectedDistrict" :disabled="!selectedProvince">
+                            <option value="" disabled selected>Lütfen İlçe Seçiniz</option>
+                             <template x-for="district in availableDistricts" :key="district.id">
+                                <option :value="district.id" x-text="district.name"></option>
+                            </template>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -115,8 +139,8 @@
             </div>
 
             <div class="flex justify-end pt-8">
-                <button @click="if(location) step = 2" 
-                        :disabled="!location"
+                <button @click="step = 2" 
+                        :disabled="!locationValid"
                         class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
                     İleri
                 </button>
@@ -195,7 +219,15 @@
                     </div>
                     <div>
                         <p class="text-xs text-slate-400 font-bold uppercase tracking-wide">Konum Tercihi</p>
-                        <p class="text-lg font-bold text-slate-800 capitalize" x-text="location"></p>
+                        <template x-if="locationMode === 'suggestion' || location === 'current'">
+                             <p class="text-lg font-bold text-slate-800 capitalize" x-text="location"></p>
+                        </template>
+                        <template x-if="locationMode === 'common' && location !== 'current'">
+                            <p class="text-lg font-bold text-slate-800">
+                                <span x-text="provinces.find(p => p.id == selectedProvince)?.name"></span> / 
+                                <span x-text="availableDistricts.find(d => d.id == selectedDistrict)?.name"></span>
+                            </p>
+                        </template>
                     </div>
                 </div>
 
@@ -229,15 +261,31 @@
 
             </div>
 
+            <!-- Hidden Form for Submission -->
+            <form id="participate-form" method="POST" action="{{ route('events.respond', $viewModel->event->slug) }}">
+                @csrf
+                <!-- Note: location_answer is kept but null/optional now. Sending IDs. -->
+                <input type="hidden" name="location_answer" :value="location">
+                <input type="hidden" name="province_id" :value="selectedProvince">
+                <input type="hidden" name="district_id" :value="selectedDistrict">
+                <template x-for="date in dates">
+                    <input type="hidden" name="selected_dates[]" :value="date">
+                </template>
+                <template x-for="time in times">
+                    <input type="hidden" name="selected_times[]" :value="time">
+                </template>
+            </form>
+
             <div class="flex justify-between pt-4">
                 <button @click="step = 2" class="btn-secondary px-6">Geri</button>
-                 <!-- NOTE: This link will be replaced by a real form submit later -->
-                <a href="{{ route('events.result') }}" class="btn-primary flex-1 ml-4 !bg-emerald-500 hover:!bg-emerald-600 !shadow-emerald-500/30">
+                
+                <button @click="document.getElementById('participate-form').submit()" 
+                        class="btn-primary flex-1 ml-4 !bg-emerald-500 hover:!bg-emerald-600 !shadow-emerald-500/30">
                     Katılımı Gönder
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                </a>
+                </button>
             </div>
         </div>
 

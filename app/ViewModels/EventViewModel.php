@@ -35,4 +35,32 @@ class EventViewModel
     {
         return $this->event->responses()->count();
     }
+
+    public function provinces()
+    {
+        return \App\Models\Province::all();
+    }
+
+    public function districts()
+    {
+        return \App\Models\District::all()->groupBy('province_id');
+    }
+
+    public function formatResponseDates(\App\Models\Response $response): string
+    {
+        if (empty($response->selected_dates)) return 'Tarih seçilmedi';
+        
+        $dates = array_map(function($date) {
+            return Carbon::parse($date)->translatedFormat('d F');
+        }, $response->selected_dates);
+        
+        return implode(', ', $dates);
+    }
+
+    public function formatResponseTimes(\App\Models\Response $response): string
+    {
+        if (empty($response->selected_times)) return 'Saat seçilmedi';
+        
+        return implode(', ', $response->selected_times);
+    }
 }

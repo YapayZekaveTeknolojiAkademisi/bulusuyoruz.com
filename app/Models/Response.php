@@ -14,6 +14,9 @@ class Response extends Model
         'event_id',
         'user_id',
         'ip_address',
+        'location_answer',
+        'province_id',
+        'district_id',
         'selected_dates',
         'selected_times',
     ];
@@ -31,5 +34,15 @@ class Response extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(Province::class);
+    }
+
+    public function district(): BelongsTo
+    {
+        return $this->belongsTo(District::class);
     }
 }
