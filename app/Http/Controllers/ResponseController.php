@@ -23,7 +23,7 @@ class ResponseController extends Controller
                 $request->ip()
             );
 
-            return redirect()->route('events.result')->with('success', 'Yanıtınız kaydedildi!');
+            return redirect()->route('events.result', $event->slug)->with('success', 'Yanıtınız kaydedildi!');
             
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Response creation failed: ' . $e->getMessage());
