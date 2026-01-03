@@ -87,10 +87,6 @@ Projeyi yerel ortamınızda çalıştırmak için aşağıdaki adımları izleyi
 6.  **Tarayıcıda Açın:**
     `http://localhost:8000` adresine gidin.
 
-## 📸 Ekran Görüntüleri
-
-*(Buraya projenin arayüzünden örnek ekran görüntüleri eklenebilir)*
-
 ---
 
 **Lisans:** [MIT](https://opensource.org/licenses/MIT)
