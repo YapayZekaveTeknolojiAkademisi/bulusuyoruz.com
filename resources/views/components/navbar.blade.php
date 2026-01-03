@@ -1,4 +1,4 @@
-<header class="w-full flex items-center justify-between px-6 py-6 md:px-12 max-w-7xl mx-auto z-10 relative">
+<header class="w-full flex items-center justify-between px-6 py-6 md:px-12 max-w-7xl mx-auto z-50 relative">
     <!-- Logo -->
     <a href="/" class="text-2xl font-bold tracking-tight text-slate-900 group">
         <span class="text-primary group-hover:opacity-80 transition-opacity">{{ config('app.name', 'Buluşuyoruz') }}</span>
