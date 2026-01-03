@@ -17,7 +17,7 @@
                         <input type="text" id="title" name="title" value="{{ old('title') }}" 
                                class="input-field peer pt-6 pb-2 border-0 border-b-2 border-slate-200 bg-transparent rounded-none px-0 focus:ring-0 focus:border-primary placeholder-transparent text-lg font-semibold" 
                                placeholder=" " required autofocus />
-                        <label for="title" class="absolute text-slate-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] left-0 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 peer-focus:text-primary">
+                        <label for="title" class="absolute text-slate-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 peer-focus:text-primary">
                             Etkinlik Adı
                         </label>
                         <x-input-error :messages="$errors->get('title')" class="mt-2" />
@@ -44,7 +44,7 @@
                             <!-- Option 1: Common Location -->
                             <label class="cursor-pointer">
                                 <input type="radio" name="location_mode" value="common" x-model="locationMode" class="peer sr-only" checked>
-                                <div class="p-4 rounded-xl border-2 border-slate-200 hover:border-blue-300 peer-checked:border-primary peer-checked:bg-blue-50/50 transition-all group">
+                                <div class="p-4 rounded-xl border-2 border-slate-200 hover:border-blue-300 peer-checked:border-primary peer-checked:bg-blue-50/50 transition-all group h-full flex flex-col">
                                     <div class="flex items-center gap-3 mb-2">
                                         <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
@@ -54,14 +54,14 @@
                                         </div>
                                         <span class="font-semibold text-slate-900">Ortak Konum</span>
                                     </div>
-                                    <p class="text-xs text-slate-500">Katılımcıların konumuna göre orta nokta bulunsun.</p>
+                                    <p class="text-xs text-slate-500 flex-1">Katılımcıların konumuna göre orta nokta bulunsun.</p>
                                 </div>
                             </label>
 
                             <!-- Option 2: Suggestion -->
                             <label class="cursor-pointer">
                                 <input type="radio" name="location_mode" value="suggestion" x-model="locationMode" class="peer sr-only">
-                                <div class="p-4 rounded-xl border-2 border-slate-200 hover:border-green-300 peer-checked:border-green-500 peer-checked:bg-green-50/50 transition-all group">
+                                <div class="p-4 rounded-xl border-2 border-slate-200 hover:border-green-300 peer-checked:border-green-500 peer-checked:bg-green-50/50 transition-all group h-full flex flex-col">
                                     <div class="flex items-center gap-3 mb-2">
                                         <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
@@ -71,7 +71,7 @@
                                         </div>
                                         <span class="font-semibold text-slate-900">Buluşma Noktası</span>
                                     </div>
-                                    <p class="text-xs text-slate-500">Ben bir yer önereceğim veya anket yapılsın.</p>
+                                    <p class="text-xs text-slate-500 flex-1">Ben bir yer önereceğim veya anket yapılsın.</p>
                                 </div>
                             </label>
                         </div>

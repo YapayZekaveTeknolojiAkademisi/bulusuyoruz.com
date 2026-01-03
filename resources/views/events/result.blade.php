@@ -27,7 +27,7 @@
             <div class="bg-slate-50 rounded-xl p-6 text-left mb-8 border border-slate-100">
                 <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-200/60">
                     <span class="text-slate-400 font-medium">Etkinlik</span>
-                    <span class="font-bold text-slate-700">Haftasonu Kahvaltısı</span>
+                    <span class="font-bold text-slate-700">{{ $event->title }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-slate-400 font-medium">Durum</span>

@@ -30,18 +30,25 @@ Route::middleware('auth')->group(function () {
     // Edit Event Routes
     Route::get('/e/{event:slug}/edit', [EventController::class, 'edit'])->name('events.edit');
     Route::put('/e/{event:slug}', [EventController::class, 'update'])->name('events.update');
+    
+    // AI Finalize Route
+    Route::post('/e/{event:slug}/finalize', [EventController::class, 'finalize'])->name('events.finalize');
+    
+    // Reactivate Event Route
+    Route::post('/e/{event:slug}/reactivate', [EventController::class, 'reactivate'])->name('events.reactivate');
 });
 
 // Public Event Routes
 Route::get('/e/{event:slug}', [EventController::class, 'show'])->name('events.show');
 Route::post('/e/{event:slug}/respond', [App\Http\Controllers\ResponseController::class, 'store'])->name('events.respond');
 
-Route::get('/participate', function () {
-    return view('events.participate');
-})->name('events.participate'); // Requires update to take event slug later
+// Old mock participate route - disabled, participation is done via show.blade.php
+// Route::get('/participate', function () {
+//     return view('events.participate');
+// })->name('events.participate');
 
-Route::get('/result', function () {
-    return view('events.result');
+Route::get('/e/{event:slug}/result', function (App\Models\Event $event) {
+    return view('events.result', compact('event'));
 })->name('events.result');
 
 require __DIR__.'/auth.php';

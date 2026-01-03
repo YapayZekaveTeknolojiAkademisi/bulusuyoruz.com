@@ -58,8 +58,7 @@ class EventController extends Controller
 
     public function update(\App\Http\Requests\UpdateEventRequest $request, Event $event)
     {
-        // Authorization is handled by authorize() method in UpdateEventRequest
-        
+        // ... existing update code ...
         try {
             $this->eventService->updateEvent($event, $request->validated());
             return redirect()->route('events.show', $event->slug)->with('success', 'Etkinlik başarıyla güncellendi!');
@@ -67,5 +66,57 @@ class EventController extends Controller
             \Illuminate\Support\Facades\Log::error('Event update failed: ' . $e->getMessage());
             return back()->with('error', 'Güncelleme sırasında bir hata oluştu.');
         }
+    }
+
+    public function finalize(Event $event, \App\Services\Ai\AiServiceInterface $aiService)
+    {
+        if (auth()->id() !== $event->user_id) {
+            abort(403);
+        }
+
+        // Removed the check that prevents re-running analysis
+        // if ($event->status === 'completed') { ... }
+
+        try {
+            $analysis = $aiService->analyzeEvent($event);
+
+            // Use updateOrCreate to either create a new result or update the existing one
+            $event->result()->updateOrCreate(
+                ['event_id' => $event->id], // Condition to find existing
+                [
+                    'suggested_location' => $analysis['suggested_location'],
+                    'suggested_date' => $analysis['suggested_date'],
+                    'suggested_time' => $analysis['suggested_time'],
+                    'reasoning' => $analysis['reasoning'],
+                ]
+            );
+
+            $event->update(['status' => 'completed']);
+
+            return redirect()->route('events.show', $event->slug)->with('success', 'Yapay zeka planlamayı güncelledi! 🚀');
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('AI Finalize Error: ' . $e->getMessage());
+            return back()->with('error', 'Yapay zeka servisi şu an yanıt veremiyor. Lütfen daha sonra tekrar deneyin.');
+        }
+    }
+
+    /**
+     * Reactivate a completed event to continue receiving responses.
+     */
+    public function reactivate(Event $event)
+    {
+        if (auth()->id() !== $event->user_id) {
+            abort(403);
+        }
+
+        if ($event->status !== 'completed') {
+            return back()->with('info', 'Bu etkinlik zaten aktif durumda.');
+        }
+
+        // Set status back to active (or 'pending' depending on your schema)
+        $event->update(['status' => 'active']);
+
+        return redirect()->route('events.show', $event->slug)->with('success', 'Etkinlik tekrar aktif edildi! Artık yeni yanıtlar alabilirsin. ✅');
     }
 }

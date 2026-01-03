@@ -86,6 +86,8 @@
             <div class="space-y-4">
                 
                 <!-- Current Location Option (Only for Common Mode) -->
+                <!-- Current Location Option (Only for Common Mode) -->
+                {{-- 
                 <div x-show="locationMode === 'common'" 
                      @click="location = 'current'; selectedProvince = ''; selectedDistrict = ''" 
                      class="cursor-pointer p-6 rounded-xl border-2 transition-all duration-200 flex items-center gap-4 hover:shadow-md"
@@ -101,6 +103,7 @@
                         <span class="block text-sm text-slate-500">Otomatik tespit edilir</span>
                     </div>
                 </div>
+                --}}
                 
                 <!-- Province/District Dropdowns (Available for both modes) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" 
