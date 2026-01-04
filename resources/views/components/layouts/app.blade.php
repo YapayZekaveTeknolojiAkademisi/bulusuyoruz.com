@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? 'Buluşuyoruz' }}</title>
 
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Bulşuyoruz" />
+    <link rel="manifest" href="/site.webmanifest" />
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-15YP3SX1BV"></script>
     <script>
@@ -22,6 +29,7 @@
     
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <style>
@@ -41,7 +49,7 @@
     <x-navbar />
 
     <!-- Main Content -->
-    <main class="flex-grow w-full max-w-7xl mx-auto px-6 py-8 md:px-12 z-10">
+    <main class="flex-grow w-full z-10 {{ $attributes->get('full-width') ? '' : 'max-w-7xl mx-auto px-6 py-8 md:px-12' }}">
         {{ $slot }}
     </main>
 
