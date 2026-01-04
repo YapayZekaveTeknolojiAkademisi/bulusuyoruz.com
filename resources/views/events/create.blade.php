@@ -78,6 +78,24 @@
                         <x-input-error :messages="$errors->get('location_mode')" class="mt-2" />
                     </div>
 
+                    <!-- Province Selection (Optional) -->
+                    <div>
+                        <label for="province_id" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                            Şehir (Opsiyonel)
+                        </label>
+                        <p class="text-xs text-slate-400 mb-3">Bir şehir seçerseniz, katılımcılar yalnızca o şehirdeki ilçeleri görebilir.</p>
+                        <select id="province_id" name="province_id" class="input-field">
+                            <option value="">Tüm Türkiye (Şehir Sınırlaması Yok)</option>
+                            @foreach(\App\Models\Province::orderBy('name')->get() as $province)
+                                <option value="{{ $province->id }}" {{ old('province_id') == $province->id ? 'selected' : '' }}>
+                                    {{ $province->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <x-input-error :messages="$errors->get('province_id')" class="mt-2" />
+                    </div>
+
+
                     <!-- Description -->
                     <div class="relative group">
                         <textarea id="description" name="description" rows="3" class="input-field peer pt-6 pb-2" placeholder=" ">{{ old('description') }}</textarea>

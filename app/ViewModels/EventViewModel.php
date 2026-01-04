@@ -38,13 +38,26 @@ class EventViewModel
 
     public function provinces()
     {
+        // If event has a province restriction, return only that province
+        if ($this->event->province_id) {
+            return \App\Models\Province::where('id', $this->event->province_id)->get();
+        }
+        
         return \App\Models\Province::all();
     }
 
     public function districts()
     {
+        // If event has a province restriction, return only that province's districts
+        if ($this->event->province_id) {
+            return \App\Models\District::where('province_id', $this->event->province_id)
+                ->get()
+                ->groupBy('province_id');
+        }
+        
         return \App\Models\District::all()->groupBy('province_id');
     }
+
 
     public function formatResponseDates(\App\Models\Response $response): string
     {

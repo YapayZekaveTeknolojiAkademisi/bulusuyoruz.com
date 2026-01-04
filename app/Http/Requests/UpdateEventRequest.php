@@ -24,6 +24,7 @@ class UpdateEventRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'province_id' => ['nullable', 'integer', 'exists:provinces,id'],
             'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'location_mode' => ['required', 'in:common,suggestion'],

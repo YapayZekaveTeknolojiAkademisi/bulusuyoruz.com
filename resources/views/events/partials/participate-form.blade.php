@@ -11,9 +11,18 @@
     availableTimes: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'],
     provinces: {{ json_encode($viewModel->provinces()) }},
     districts: {{ json_encode($viewModel->districts()) }},
-    selectedProvince: '',
+    hasProvinceRestriction: {{ $viewModel->event->province_id ? 'true' : 'false' }},
+    restrictedProvinceId: '{{ $viewModel->event->province_id ?? '' }}',
+    selectedProvince: '{{ $viewModel->event->province_id ?? '' }}',
     selectedDistrict: '',
     availableDistricts: [],
+
+    init() {
+        // If province is restricted, pre-load districts
+        if (this.hasProvinceRestriction && this.restrictedProvinceId) {
+            this.availableDistricts = this.districts[this.restrictedProvinceId] || [];
+        }
+    },
 
     updateDistricts() {
         this.availableDistricts = this.districts[this.selectedProvince] || [];
@@ -85,48 +94,46 @@
             <!-- Location Selection (Unified for both modes) -->
             <div class="space-y-4">
                 
-                <!-- Current Location Option (Only for Common Mode) -->
-                <!-- Current Location Option (Only for Common Mode) -->
-                {{-- 
-                <div x-show="locationMode === 'common'" 
-                     @click="location = 'current'; selectedProvince = ''; selectedDistrict = ''" 
-                     class="cursor-pointer p-6 rounded-xl border-2 transition-all duration-200 flex items-center gap-4 hover:shadow-md"
-                     :class="location === 'current' ? 'border-primary bg-primary/5' : 'border-slate-100 bg-white hover:border-slate-200'">
-                    <div class="w-12 h-12 rounded-full bg-blue-100 text-primary flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <span class="block font-bold text-slate-800">Bulunduğum Konumu Kullan</span>
-                        <span class="block text-sm text-slate-500">Otomatik tespit edilir</span>
-                    </div>
-                </div>
-                --}}
-                
-                <!-- Province/District Dropdowns (Available for both modes) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" 
-                     :class="{'opacity-50': location === 'current'}"
+                <!-- Province/District Dropdowns -->
+                <div :class="{'opacity-50': location === 'current'}"
                      @click="if(location === 'current') location = null">
-                    <div class="relative group">
-                         <select class="input-field" x-model="selectedProvince" @change="updateDistricts(); location = null">
-                            <option value="" disabled selected>Lütfen İl Seçiniz</option>
-                            <template x-for="province in provinces" :key="province.id">
-                                <option :value="province.id" x-text="province.name"></option>
-                            </template>
-                        </select>
-                    </div>
-                    <div class="relative group">
-                         <select class="input-field" x-model="selectedDistrict" :disabled="!selectedProvince" @change="location = null">
-                            <option value="" disabled selected>Lütfen İlçe Seçiniz</option>
-                             <template x-for="district in availableDistricts" :key="district.id">
-                                <option :value="district.id" x-text="district.name"></option>
-                            </template>
-                        </select>
+                    
+                    <!-- Show province info if restricted -->
+                    <template x-if="hasProvinceRestriction">
+                        <div class="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                            <div class="flex items-center gap-2 text-blue-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                </svg>
+                                <span class="font-semibold">Bu etkinlik <span x-text="provinces[0]?.name"></span> şehri için düzenlendi</span>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <div class="grid gap-4" :class="hasProvinceRestriction ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'">
+                        <!-- Province Dropdown (only show if no restriction) -->
+                        <div class="relative group" x-show="!hasProvinceRestriction">
+                             <select class="input-field" x-model="selectedProvince" @change="updateDistricts(); location = null">
+                                <option value="" disabled selected>Lütfen İl Seçiniz</option>
+                                <template x-for="province in provinces" :key="province.id">
+                                    <option :value="province.id" x-text="province.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                        
+                        <!-- District Dropdown -->
+                        <div class="relative group">
+                             <select class="input-field" x-model="selectedDistrict" :disabled="!selectedProvince && !hasProvinceRestriction" @change="location = null">
+                                <option value="" disabled selected>Lütfen İlçe Seçiniz</option>
+                                 <template x-for="district in availableDistricts" :key="district.id">
+                                    <option :value="district.id" x-text="district.name"></option>
+                                </template>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
+
 
             <div class="flex justify-end pt-8">
                 <button @click="step = 2" 
@@ -148,21 +155,87 @@
             <h2 class="text-2xl font-bold mb-6 text-slate-800">Ne Zaman?</h2>
             
             <!-- Date Selection -->
-            <div class="mb-8">
+            <div class="mb-8" x-data="{
+                getDateInfo(dayIndex) {
+                    const date = new Date(startDate.getTime() + dayIndex * 86400000);
+                    return {
+                        date: date,
+                        dateStr: date.toISOString().split('T')[0],
+                        dayOfWeek: date.getDay(), // 0=Sun, 1=Mon, ..., 6=Sat
+                        dayNum: date.getDate(),
+                        monthShort: date.toLocaleDateString('tr-TR', { month: 'short' })
+                    };
+                },
+                getWeeks() {
+                    const weeks = [];
+                    let currentWeek = [null, null, null, null, null, null, null]; // Mon-Sun (index 0-6)
+                    
+                    for (let i = 0; i < daysDifference; i++) {
+                        const info = this.getDateInfo(i);
+                        // Convert JS day (0=Sun) to week position (Mon=0, Tue=1, ... Sun=6)
+                        let weekPos = info.dayOfWeek === 0 ? 6 : info.dayOfWeek - 1;
+                        
+                        // If we're at Monday and week has data, push and reset
+                        if (weekPos === 0 && i > 0 && currentWeek.some(d => d !== null)) {
+                            weeks.push([...currentWeek]);
+                            currentWeek = [null, null, null, null, null, null, null];
+                        }
+                        
+                        currentWeek[weekPos] = { ...info, index: i };
+                    }
+                    
+                    // Push last week
+                    if (currentWeek.some(d => d !== null)) {
+                        weeks.push(currentWeek);
+                    }
+                    
+                    return weeks;
+                }
+            }">
                 <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Tarih Seçimi</h3>
-                <div class="flex flex-wrap gap-2">
-                    <template x-for="i in daysDifference">
-                        <button @click="toggleDate(new Date(startDate.getTime() + (i-1) * 86400000).toISOString().split('T')[0])" 
-                                class="w-14 h-16 rounded-xl flex flex-col items-center justify-center transition-all duration-200 border"
-                                :class="dates.includes(new Date(startDate.getTime() + (i-1) * 86400000).toISOString().split('T')[0]) 
-                                    ? 'bg-secondary border-secondary text-white shadow-md scale-105' 
-                                    : 'bg-white border-slate-200 text-slate-600 hover:border-primary/50'">
-                            <span class="text-[10px] opacity-70">Oca</span>
-                            <span class="font-bold text-lg" x-text="new Date(startDate.getTime() + (i-1) * 86400000).getDate()"></span>
-                        </button>
+                
+                <!-- Week Days Header -->
+                <div class="grid grid-cols-7 gap-1 mb-2">
+                    <div class="text-center text-xs font-semibold text-slate-400 py-1">Pzt</div>
+                    <div class="text-center text-xs font-semibold text-slate-400 py-1">Sal</div>
+                    <div class="text-center text-xs font-semibold text-slate-400 py-1">Çar</div>
+                    <div class="text-center text-xs font-semibold text-slate-400 py-1">Per</div>
+                    <div class="text-center text-xs font-semibold text-slate-400 py-1">Cum</div>
+                    <div class="text-center text-xs font-semibold text-amber-500 py-1">Cmt</div>
+                    <div class="text-center text-xs font-semibold text-amber-500 py-1">Paz</div>
+                </div>
+                
+                <!-- Calendar Grid -->
+                <div class="space-y-1">
+                    <template x-for="(week, weekIndex) in getWeeks()" :key="weekIndex">
+                        <div class="grid grid-cols-7 gap-1">
+                            <template x-for="(day, dayIndex) in week" :key="dayIndex">
+                                <div>
+                                    <template x-if="day !== null">
+                                        <button type="button"
+                                                @click="toggleDate(day.dateStr)"
+                                                class="w-full aspect-square rounded-lg flex flex-col items-center justify-center transition-all duration-200 border text-sm"
+                                                :class="[
+                                                    dates.includes(day.dateStr) 
+                                                        ? 'bg-secondary border-secondary text-white shadow-md scale-105' 
+                                                        : dayIndex >= 5 
+                                                            ? 'bg-amber-50 border-amber-200 text-amber-700 hover:border-amber-400' 
+                                                            : 'bg-white border-slate-200 text-slate-600 hover:border-primary/50'
+                                                ]">
+                                            <span class="text-[9px] opacity-70" x-text="day.monthShort"></span>
+                                            <span class="font-bold" x-text="day.dayNum"></span>
+                                        </button>
+                                    </template>
+                                    <template x-if="day === null">
+                                        <div class="w-full aspect-square"></div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
                     </template>
                 </div>
             </div>
+
 
             <!-- Time Selection -->
             <div class="mb-8">
