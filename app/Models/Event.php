@@ -18,16 +18,17 @@ class Event extends Model
         'title',
         'description',
         'user_id',
+        'province_id',
         'location_mode',
         'start_date',
         'end_date',
-        'status', // Added
+        'status',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'status' => 'string', // Added
+        'status' => 'string',
     ];
 
     protected static function boot()
@@ -44,6 +45,11 @@ class Event extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(Province::class);
+    }
+
     public function responses(): HasMany
     {
         return $this->hasMany(Response::class);
@@ -54,3 +60,4 @@ class Event extends Model
         return $this->hasOne(EventResult::class);
     }
 }
+

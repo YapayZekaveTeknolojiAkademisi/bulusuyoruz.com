@@ -21,6 +21,7 @@ class EventService
             return $user->events()->create([
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
+                'province_id' => $data['province_id'] ?? null,
                 'start_date' => $data['start_date'],
                 'end_date' => $data['end_date'],
                 'location_mode' => $data['location_mode'],
@@ -34,6 +35,7 @@ class EventService
             $event->update([
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
+                'province_id' => $data['province_id'] ?? null,
                 'start_date' => $data['start_date'],
                 'end_date' => $data['end_date'],
                 'location_mode' => $data['location_mode'],

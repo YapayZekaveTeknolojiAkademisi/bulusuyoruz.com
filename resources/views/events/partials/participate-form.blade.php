@@ -11,9 +11,18 @@
     availableTimes: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'],
     provinces: {{ json_encode($viewModel->provinces()) }},
     districts: {{ json_encode($viewModel->districts()) }},
-    selectedProvince: '',
+    hasProvinceRestriction: {{ $viewModel->event->province_id ? 'true' : 'false' }},
+    restrictedProvinceId: '{{ $viewModel->event->province_id ?? '' }}',
+    selectedProvince: '{{ $viewModel->event->province_id ?? '' }}',
     selectedDistrict: '',
     availableDistricts: [],
+
+    init() {
+        // If province is restricted, pre-load districts
+        if (this.hasProvinceRestriction && this.restrictedProvinceId) {
+            this.availableDistricts = this.districts[this.restrictedProvinceId] || [];
+        }
+    },
 
     updateDistricts() {
         this.availableDistricts = this.districts[this.selectedProvince] || [];
@@ -85,48 +94,46 @@
             <!-- Location Selection (Unified for both modes) -->
             <div class="space-y-4">
                 
-                <!-- Current Location Option (Only for Common Mode) -->
-                <!-- Current Location Option (Only for Common Mode) -->
-                {{-- 
-                <div x-show="locationMode === 'common'" 
-                     @click="location = 'current'; selectedProvince = ''; selectedDistrict = ''" 
-                     class="cursor-pointer p-6 rounded-xl border-2 transition-all duration-200 flex items-center gap-4 hover:shadow-md"
-                     :class="location === 'current' ? 'border-primary bg-primary/5' : 'border-slate-100 bg-white hover:border-slate-200'">
-                    <div class="w-12 h-12 rounded-full bg-blue-100 text-primary flex items-center justify-center shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <span class="block font-bold text-slate-800">Bulunduğum Konumu Kullan</span>
-                        <span class="block text-sm text-slate-500">Otomatik tespit edilir</span>
-                    </div>
-                </div>
-                --}}
-                
-                <!-- Province/District Dropdowns (Available for both modes) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" 
-                     :class="{'opacity-50': location === 'current'}"
+                <!-- Province/District Dropdowns -->
+                <div :class="{'opacity-50': location === 'current'}"
                      @click="if(location === 'current') location = null">
-                    <div class="relative group">
-                         <select class="input-field" x-model="selectedProvince" @change="updateDistricts(); location = null">
-                            <option value="" disabled selected>Lütfen İl Seçiniz</option>
-                            <template x-for="province in provinces" :key="province.id">
-                                <option :value="province.id" x-text="province.name"></option>
-                            </template>
-                        </select>
-                    </div>
-                    <div class="relative group">
-                         <select class="input-field" x-model="selectedDistrict" :disabled="!selectedProvince" @change="location = null">
-                            <option value="" disabled selected>Lütfen İlçe Seçiniz</option>
-                             <template x-for="district in availableDistricts" :key="district.id">
-                                <option :value="district.id" x-text="district.name"></option>
-                            </template>
-                        </select>
+                    
+                    <!-- Show province info if restricted -->
+                    <template x-if="hasProvinceRestriction">
+                        <div class="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                            <div class="flex items-center gap-2 text-blue-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                </svg>
+                                <span class="font-semibold">Bu etkinlik <span x-text="provinces[0]?.name"></span> şehri için düzenlendi</span>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <div class="grid gap-4" :class="hasProvinceRestriction ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'">
+                        <!-- Province Dropdown (only show if no restriction) -->
+                        <div class="relative group" x-show="!hasProvinceRestriction">
+                             <select class="input-field" x-model="selectedProvince" @change="updateDistricts(); location = null">
+                                <option value="" disabled selected>Lütfen İl Seçiniz</option>
+                                <template x-for="province in provinces" :key="province.id">
+                                    <option :value="province.id" x-text="province.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                        
+                        <!-- District Dropdown -->
+                        <div class="relative group">
+                             <select class="input-field" x-model="selectedDistrict" :disabled="!selectedProvince && !hasProvinceRestriction" @change="location = null">
+                                <option value="" disabled selected>Lütfen İlçe Seçiniz</option>
+                                 <template x-for="district in availableDistricts" :key="district.id">
+                                    <option :value="district.id" x-text="district.name"></option>
+                                </template>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
+
 
             <div class="flex justify-end pt-8">
                 <button @click="step = 2" 
