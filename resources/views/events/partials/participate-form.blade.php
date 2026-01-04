@@ -155,21 +155,87 @@
             <h2 class="text-2xl font-bold mb-6 text-slate-800">Ne Zaman?</h2>
             
             <!-- Date Selection -->
-            <div class="mb-8">
+            <div class="mb-8" x-data="{
+                getDateInfo(dayIndex) {
+                    const date = new Date(startDate.getTime() + dayIndex * 86400000);
+                    return {
+                        date: date,
+                        dateStr: date.toISOString().split('T')[0],
+                        dayOfWeek: date.getDay(), // 0=Sun, 1=Mon, ..., 6=Sat
+                        dayNum: date.getDate(),
+                        monthShort: date.toLocaleDateString('tr-TR', { month: 'short' })
+                    };
+                },
+                getWeeks() {
+                    const weeks = [];
+                    let currentWeek = [null, null, null, null, null, null, null]; // Mon-Sun (index 0-6)
+                    
+                    for (let i = 0; i < daysDifference; i++) {
+                        const info = this.getDateInfo(i);
+                        // Convert JS day (0=Sun) to week position (Mon=0, Tue=1, ... Sun=6)
+                        let weekPos = info.dayOfWeek === 0 ? 6 : info.dayOfWeek - 1;
+                        
+                        // If we're at Monday and week has data, push and reset
+                        if (weekPos === 0 && i > 0 && currentWeek.some(d => d !== null)) {
+                            weeks.push([...currentWeek]);
+                            currentWeek = [null, null, null, null, null, null, null];
+                        }
+                        
+                        currentWeek[weekPos] = { ...info, index: i };
+                    }
+                    
+                    // Push last week
+                    if (currentWeek.some(d => d !== null)) {
+                        weeks.push(currentWeek);
+                    }
+                    
+                    return weeks;
+                }
+            }">
                 <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Tarih Seçimi</h3>
-                <div class="flex flex-wrap gap-2">
-                    <template x-for="i in daysDifference">
-                        <button @click="toggleDate(new Date(startDate.getTime() + (i-1) * 86400000).toISOString().split('T')[0])" 
-                                class="w-14 h-16 rounded-xl flex flex-col items-center justify-center transition-all duration-200 border"
-                                :class="dates.includes(new Date(startDate.getTime() + (i-1) * 86400000).toISOString().split('T')[0]) 
-                                    ? 'bg-secondary border-secondary text-white shadow-md scale-105' 
-                                    : 'bg-white border-slate-200 text-slate-600 hover:border-primary/50'">
-                            <span class="text-[10px] opacity-70">Oca</span>
-                            <span class="font-bold text-lg" x-text="new Date(startDate.getTime() + (i-1) * 86400000).getDate()"></span>
-                        </button>
+                
+                <!-- Week Days Header -->
+                <div class="grid grid-cols-7 gap-1 mb-2">
+                    <div class="text-center text-xs font-semibold text-slate-400 py-1">Pzt</div>
+                    <div class="text-center text-xs font-semibold text-slate-400 py-1">Sal</div>
+                    <div class="text-center text-xs font-semibold text-slate-400 py-1">Çar</div>
+                    <div class="text-center text-xs font-semibold text-slate-400 py-1">Per</div>
+                    <div class="text-center text-xs font-semibold text-slate-400 py-1">Cum</div>
+                    <div class="text-center text-xs font-semibold text-amber-500 py-1">Cmt</div>
+                    <div class="text-center text-xs font-semibold text-amber-500 py-1">Paz</div>
+                </div>
+                
+                <!-- Calendar Grid -->
+                <div class="space-y-1">
+                    <template x-for="(week, weekIndex) in getWeeks()" :key="weekIndex">
+                        <div class="grid grid-cols-7 gap-1">
+                            <template x-for="(day, dayIndex) in week" :key="dayIndex">
+                                <div>
+                                    <template x-if="day !== null">
+                                        <button type="button"
+                                                @click="toggleDate(day.dateStr)"
+                                                class="w-full aspect-square rounded-lg flex flex-col items-center justify-center transition-all duration-200 border text-sm"
+                                                :class="[
+                                                    dates.includes(day.dateStr) 
+                                                        ? 'bg-secondary border-secondary text-white shadow-md scale-105' 
+                                                        : dayIndex >= 5 
+                                                            ? 'bg-amber-50 border-amber-200 text-amber-700 hover:border-amber-400' 
+                                                            : 'bg-white border-slate-200 text-slate-600 hover:border-primary/50'
+                                                ]">
+                                            <span class="text-[9px] opacity-70" x-text="day.monthShort"></span>
+                                            <span class="font-bold" x-text="day.dayNum"></span>
+                                        </button>
+                                    </template>
+                                    <template x-if="day === null">
+                                        <div class="w-full aspect-square"></div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
                     </template>
                 </div>
             </div>
+
 
             <!-- Time Selection -->
             <div class="mb-8">
