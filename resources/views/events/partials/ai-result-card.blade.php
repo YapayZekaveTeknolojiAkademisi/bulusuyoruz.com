@@ -19,6 +19,7 @@
     <div class="bg-white border border-slate-200 rounded-2xl p-6 text-left shadow-sm mb-6 relative overflow-hidden">
         <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-emerald-400 to-teal-500"></div>
         <div class="space-y-6 pl-2">
+            @if($viewModel->event->collect_location && $viewModel->event->result->suggested_location)
             <div class="flex items-start gap-4">
                     <div class="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center shrink-0 text-teal-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -32,6 +33,7 @@
             </div>
             
             <div class="w-full h-px bg-slate-100"></div>
+            @endif
 
             <div class="flex items-start gap-4">
                     <div class="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center shrink-0 text-teal-600">
