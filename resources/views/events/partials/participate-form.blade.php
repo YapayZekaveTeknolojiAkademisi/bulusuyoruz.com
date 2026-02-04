@@ -1,5 +1,6 @@
 <div class="max-w-3xl mx-auto w-full" x-data="{ 
-    step: 1, 
+    collectLocation: {{ $viewModel->event->collect_location ? 'true' : 'false' }},
+    step: {{ $viewModel->event->collect_location ? '1' : '2' }}, 
     locationMode: '{{ $viewModel->event->location_mode }}', 
     location: null,
     
@@ -175,22 +176,41 @@
     <div class="flex items-center justify-between mb-10 px-4 md:px-0 relative">
         <div class="absolute left-0 top-1/2 w-full h-1 bg-gray-200 -z-10 rounded-full"></div>
         <div class="absolute left-0 top-1/2 h-1 bg-primary -z-10 rounded-full transition-all duration-500 ease-out"
-             :style="'width: ' + ((step - 1) / 2) * 100 + '%'"></div>
+             :style="collectLocation ? 'width: ' + ((step - 1) / 2) * 100 + '%' : 'width: ' + ((step - 2)) * 100 + '%'"></div>
 
-        <template x-for="i in 3">
-            <div class="flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 border-4"
-                     :class="step >= i ? 'bg-primary border-white text-white shadow-lg scale-110' : 'bg-white border-gray-200 text-gray-400'">
-                    <span x-text="i"></span>
-                </div>
+        <!-- Show 3 steps when collecting location -->
+        <template x-if="collectLocation">
+            <div class="flex items-center justify-between w-full">
+                <template x-for="i in 3">
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 border-4"
+                             :class="step >= i ? 'bg-primary border-white text-white shadow-lg scale-110' : 'bg-white border-gray-200 text-gray-400'">
+                            <span x-text="i"></span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+        
+        <!-- Show 2 steps when NOT collecting location -->
+        <template x-if="!collectLocation">
+            <div class="flex items-center justify-between w-full">
+                <template x-for="(label, index) in ['Tarih & Saat', 'Onay']">
+                    <div class="flex flex-col items-center">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 border-4"
+                             :class="step >= (index + 2) ? 'bg-primary border-white text-white shadow-lg scale-110' : 'bg-white border-gray-200 text-gray-400'">
+                            <span x-text="index + 1"></span>
+                        </div>
+                    </div>
+                </template>
             </div>
         </template>
     </div>
 
     <div class="glass rounded-2xl p-8 md:p-12 shadow-2xl min-h-[400px] flex flex-col justify-start relative overflow-hidden">
         
-        <!-- Step 1: Location -->
-        <div x-show="step === 1" x-transition:enter="transition ease-out duration-300 transform" 
+        <!-- Step 1: Location (only shown when collectLocation is true) -->
+        <div x-show="step === 1 && collectLocation" x-transition:enter="transition ease-out duration-300 transform" 
              x-transition:enter-start="opacity-0 translate-x-8" 
              x-transition:enter-end="opacity-100 translate-x-0"
              x-transition:leave="transition ease-in duration-200 transform absolute top-8 left-8 right-8" 
@@ -454,8 +474,8 @@
             
             <div class="bg-gradient-to-br from-slate-50 to-white border border-slate-100 rounded-xl p-6 mb-8 shadow-inner space-y-4">
                 
-                <!-- Location Summary -->
-                <div class="flex items-start gap-4">
+                <!-- Location Summary (only when collecting location) -->
+                <div class="flex items-start gap-4" x-show="collectLocation">
                     <div class="w-10 h-10 rounded-full bg-blue-100 text-primary flex items-center justify-center shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />

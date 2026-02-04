@@ -28,6 +28,7 @@ class UpdateEventRequest extends FormRequest
             'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'location_mode' => ['required', 'in:common,suggestion'],
+            'collect_location' => ['nullable', 'boolean'],
         ];
     }
 }

@@ -25,6 +25,7 @@ class EventService
                 'start_date' => $data['start_date'],
                 'end_date' => $data['end_date'],
                 'location_mode' => $data['location_mode'],
+                'collect_location' => $data['collect_location'] ?? true,
             ]);
         });
     }
@@ -39,6 +40,7 @@ class EventService
                 'start_date' => $data['start_date'],
                 'end_date' => $data['end_date'],
                 'location_mode' => $data['location_mode'],
+                'collect_location' => $data['collect_location'] ?? $event->collect_location,
             ]);
 
             return $event;
