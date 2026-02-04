@@ -71,22 +71,32 @@ class GeminiAiService implements AiServiceInterface
     protected function preparePrompt(Event $event): string
     {
         $responses = $event->responses()->with(['province', 'district'])->get();
+        $collectLocation = $event->collect_location;
         
-        $participantsData = $responses->map(function ($response) {
-            return [
+        $participantsData = $responses->map(function ($response) use ($collectLocation) {
+            $data = [
                 'name' => $response->name ?? 'Anonim',
-                'location' => $response->province ? ($response->province->name . '/' . $response->district->name) : $response->location_answer,
                 'available_dates' => $response->selected_dates,
                 'available_times' => $response->selected_times,
             ];
+            
+            // Only include location if collecting location
+            if ($collectLocation) {
+                $data['location'] = $response->province ? ($response->province->name . '/' . $response->district->name) : $response->location_answer;
+            }
+            
+            return $data;
         })->toJson();
 
         $eventInfo = "Etkinlik: {$event->title}\n" .
                      "Açıklama: {$event->description}\n" .
-                     "Konum Modu: {$event->location_mode}\n" .
                      "Tarih Aralığı: {$event->start_date->format('Y-m-d')} - {$event->end_date->format('Y-m-d')}";
 
-        return <<<PROMPT
+        // Different prompts based on whether we collect location or not
+        if ($collectLocation) {
+            $eventInfo .= "\nKonum Modu: {$event->location_mode}";
+            
+            return <<<PROMPT
 Sen profesyonel bir etkinlik planlama asistanısın. Görevin, aşağıdaki katılımcı verilerini analiz ederek en ideal buluşma noktasını, tarihini ve saatini belirlemektir.
 
 VERİLER:
@@ -119,5 +129,39 @@ KRİTİK KURALLAR:
 
 Sadece saf JSON döndür. Markdown formatlama kullanma.
 PROMPT;
+        } else {
+            // Date-only prompt when location is not collected
+            return <<<PROMPT
+Sen profesyonel bir etkinlik planlama asistanısın. Görevin, aşağıdaki katılımcı verilerini analiz ederek en ideal buluşma tarihini ve saatini belirlemektir.
+
+NOT: Bu etkinlikte konum bilgisi toplanmamıştır. Sadece tarih ve saat önerisi yapacaksın.
+
+VERİLER:
+$eventInfo
+
+KATILIMCILAR:
+$participantsData
+
+KRİTİK KURALLAR:
+1. TARİH VE SAAT:
+   - Katılımın en yüksek olacağı kesişim kümesini bul.
+   - Eğer tam çakışma yoksa, çoğunluğun uyduğu en iyi alternatifi seç.
+   - Hafta sonu mu hafta içi mi daha uygun, buna dikkat et.
+
+2. AÇIKLAMA:
+   - Neden bu tarihi ve saati seçtiğini, katılımcıların müsaitlik durumlarına atıfta bulunarak ikna edici şekilde açıkla.
+   - Kaç katılımcının bu tarihte müsait olduğunu belirt.
+
+ÇIKTI FORMATI (JSON):
+{
+    "suggested_location": null,
+    "suggested_date": "YYYY-MM-DD",
+    "suggested_time": "HH:MM",
+    "reasoning": "Seçim nedeni açıklaması..."
+}
+
+Sadece saf JSON döndür. Markdown formatlama kullanma.
+PROMPT;
+        }
     }
 }
