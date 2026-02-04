@@ -9,7 +9,7 @@
             </div>
 
             <div class="glass p-8 rounded-2xl">
-                <form action="{{ route('events.update', $event->slug) }}" method="POST" class="space-y-8" x-data="{ locationMode: '{{ old('location_mode', $event->location_mode) }}' }">
+                <form action="{{ route('events.update', $event->slug) }}" method="POST" class="space-y-8" x-data="{ locationMode: '{{ old('location_mode', $event->location_mode) }}', collectLocation: {{ old('collect_location', $event->collect_location) ? 'true' : 'false' }} }">
                     @csrf
                     @method('PUT')
                     
@@ -38,8 +38,20 @@
                         </div>
                     </div>
 
-                    <!-- Location Mode Selection -->
-                    <div>
+                    <!-- Collect Location Toggle -->
+                    <div class="flex items-start gap-4 p-4 rounded-xl border-2 border-slate-200 bg-white/50 hover:border-primary/30 transition-colors">
+                        <input type="hidden" name="collect_location" value="0">
+                        <input type="checkbox" id="collect_location" name="collect_location" value="1" 
+                               x-model="collectLocation"
+                               class="w-5 h-5 mt-0.5 text-primary rounded border-slate-300 focus:ring-primary">
+                        <label for="collect_location" class="flex-1 cursor-pointer">
+                            <span class="font-semibold text-slate-900">Konum Bilgisi Topla</span>
+                            <p class="text-xs text-slate-500 mt-1">Katılımcılardan konum tercihi al. Kapalıysa sadece tarih ve saat seçimi yapılır.</p>
+                        </label>
+                    </div>
+
+                    <!-- Location Mode Selection (Conditional) -->
+                    <div x-show="collectLocation" x-transition>
                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Konum Tercihi</label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- Option 1: Common Location -->
@@ -80,7 +92,7 @@
                     </div>
 
                     <!-- Province Selection (Optional) -->
-                    <div>
+                    <div x-show="collectLocation" x-transition>
                         <label for="province_id" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
                             Şehir (Opsiyonel)
                         </label>

@@ -20,6 +20,7 @@ class StoreEventRequest extends FormRequest
             'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'location_mode' => ['required', 'string', 'in:common,suggestion'],
+            'collect_location' => ['nullable', 'boolean'],
         ];
     }
 

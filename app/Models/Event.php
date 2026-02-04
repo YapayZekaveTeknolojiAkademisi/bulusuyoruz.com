@@ -20,6 +20,7 @@ class Event extends Model
         'user_id',
         'province_id',
         'location_mode',
+        'collect_location',
         'start_date',
         'end_date',
         'status',
@@ -29,6 +30,7 @@ class Event extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'status' => 'string',
+        'collect_location' => 'boolean',
     ];
 
     protected static function boot()
